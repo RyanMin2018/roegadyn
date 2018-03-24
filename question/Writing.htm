@@ -1,0 +1,107 @@
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Session.php');
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Header.php');
+
+$intMinLength = 300;
+$intMaxLength = 500;
+?>
+
+		<div id="article">
+			<div id="section_location"></div>
+			<div id="section_body">
+				<h1><span>글쓰기</span></h1>
+				<div class='subtitle'>
+					&lt;<b>상황</b>&gt; 최근 청소년의 욕설 사용이 문제가 되고있는 가운데 교내에서도 욕설로 인한 학생들 사이의 다툼이 발생하고 있다. 학생 회의에서 이에 대한 논의를 준비하는 가운데 "나에게 욕설로 공격하는 학생에게 욕을 해도 되는가?"에 대한 질문이 들어왔다. 이에 대해 자신의 입장을 정해 발표하기 위해 아래의 주제로 글을 쓰려고 한다.<br>
+					&lt;<b>주제</b>&gt; “<b>나에게 욕설로 공격하는 학생에게 욕을 해도 되는가?</b>” (<?php echo $intMaxLength; ?>자 이내)
+				</div>
+				<div id="articlecontent">
+<!-- START -->
+
+					<form name='frmEnt' id='frmEnt' method='post'>
+					<input type='hidden' name='who' id='who' value='<?php echo $who; ?>'>
+					<textarea name='essay' id='essay' style="ime-mode:active;" onKeyUp="viewLength();" placeholder='주제 : 나에게 욕을 하는 학생에게 욕을 해도 되는가?'></textarea>
+					</form>
+
+					<div id='notification'></div>
+					<div id='alert'></div>
+					<div id="btns"><a id='submit' href='javascript:commit();' onclick='speakStop();' class='btn'>제출</a></div>	
+
+
+<!-- END -->
+				</div>
+			</div>
+		</div>
+
+<style>
+textarea {width:100%;background-color:#fff;color:#000;font-size:1.1em;line-height:1.8em;}
+textarea:hover {background-color:#fff;color:#000;}
+</style>
+
+<script>
+
+$(document).ready(function(){
+	$("#alert").show();
+});
+
+function viewLength() {
+	// var len = $("#essay").val().length;
+	var len = getCharCount($("#essay").val());
+	// if (len><?php echo $intMaxLength; ?>) {
+	//	$("#essay").val($("#essay").val().trim().substring(0, <?php echo $intMaxLength; ?>));
+	// }
+	$("#notification").text(len + "/<?php echo $intMaxLength; ?>자");
+}
+
+// 공백을 제거한 글자수 리턴 : 요청 2017.11.21
+function getCharCount(str) {
+	str = replaceAll(str.trim(), " ", "");
+	return str.length;
+}
+
+
+function commit() {
+
+	var isSuccess = true;
+	$("#essay").val($("#essay").val().trim());
+	var len = getCharCount($("#essay").val());
+	if (len < <?php echo $intMinLength; ?>) {
+		showAlert("<?php echo $intMinLength; ?>자 이상으로 작성하십시오.");
+		$("#essay").focus();
+		isSuccess = false;
+	}
+//	if (len > <?php echo $intMaxLength; ?>) {
+//		showAlert("<?php echo $intMinLength; ?>자 이내로 작성하십시오.");
+//		$("#essay").focus();
+//		isSuccess = false;
+//	}
+	
+	if (isSuccess==true) {
+		spinner = new Spinner().spin(document.getElementById("articlecontent"));
+		$("#submit").fadeOut();
+		$.post("WritingProc.php", $("#frmEnt").serialize(), function(data){
+			if($.trim(data)>0) {
+				$("#section_body").effect("drop", {}, 400, function(){
+					location.href = "/survey/Survey.htm";
+				});
+			} else {
+				$("#submit").fadeIn();
+				showAlert("등록하지 못하였습니다.");
+			}
+			spinner.stop();
+		})
+		.error(function(){
+			$("#submit").fadeIn();
+			showAlert("오류가 발생했습니다.");
+			spinner.stop();
+		});
+		
+		spinner.stop();
+	}
+	// return false;
+}
+
+</script>
+
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Footer.php');
+?>

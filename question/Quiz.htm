@@ -1,0 +1,148 @@
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Session.php');
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Header.php');
+include_once($_SERVER["DOCUMENT_ROOT"].'/src/qm/QuestionDAO.php');
+
+$intNo       = (isset($_GET["no"])) ? $_GET["no"] : 0;
+$intQuizCnt  = 0;
+$arrQuiz;
+$intQuizSeq  = 0;
+$arrList;
+$intFixedIdx;
+$fixedRow;
+$strNextPage = "Quiz.htm";
+
+$dao  = new src\qm\QuestionDAO();
+$arrQuiz = $dao->getQuestions();
+
+$intQuizCnt = (isset($arrQuiz)) ? count($arrQuiz) : 0;
+$intNo = ($intNo==0 && isset($arrQuiz)) ? $arrQuiz[0]['ORD'] : $intNo;
+
+if ($intNo!=0) {
+	$arrList = $dao->getQuestion($intNo);
+	if (isset($arrList)) {
+		$intQuizSeq = $arrList[0]['QUESTION_SEQ'];
+		for($i=0; $i<count($arrList); $i++) {
+			if ($arrList[$i]['FIX_YN']=='Y') {
+				$fixedRow = $arrList[$i];
+				$intFixedIdx = $i;
+				break;
+			}
+		}
+		if (isset($intFixedIdx)) {
+			array_splice($arrList, $intFixedIdx, 1);
+		}
+		shuffle($arrList);
+	}
+}
+
+$strNextPage = ($intNo==$intQuizCnt) ? "Writing.htm" : $strNextPage."?no=".($intNo+1);
+
+?>
+
+
+
+
+		<div id="article">
+			<div id="section_location"></div>
+			<div id="section_body">
+				<h1><span>문장 배열하여 글 완성하기</span><span class='circle'><?php echo $intNo ?> / <?php echo $intQuizCnt; ?></span></h1>
+				<div id="articlecontent">
+<!-- START -->
+
+					<ul id='draggablearea'>
+
+<?php 
+if (isset($arrList)) {
+	$j = 0;
+	for($i=0; $i<count($arrList);$i++) {
+		$j++;
+		if (isset($intFixedIdx) && isset($fixedRow) && $i==$intFixedIdx) {
+			echo "<li class='AnswerSheet'          id='AnswerSheet_".$j."'><span id='".$fixedRow['ORD']."'>".$fixedRow['ITEM']."</span></li>\n";
+			$j++;
+		}
+		echo "<li class='AnswerSheet sortable' id='AnswerSheet_".$j."'><span id='".$arrList[$i]['ORD']."'>".$arrList[$i]['ITEM']."</span></li>\n";
+	}
+	if (isset($intFixedIdx) && $intFixedIdx==count($arrList) && isset($fixedRow)) {
+			echo "<li class='AnswerSheet'          id='AnswerSheet_".$j."'><span id='".$fixedRow['ORD']."'>".$fixedRow['ITEM']."</span></li>\n";
+	}
+}
+
+?>
+					</ul>
+					
+					<div id='alert'></div>
+
+
+
+
+
+<!-- END -->
+				</div>
+
+
+				<div id="btns"><a href='javascript:commit();' onclick='speakStop();' class='btn'>완성</a></div>
+
+				<form name='frmEnt' id='frmEnt' method='post'>
+				<input type='hidden' name='question' id='question' value='<?php echo $intQuizSeq; ?>'>
+				<input type='hidden' name='who'      id='who'      value='<?php echo $who; ?>'>
+				<input type='hidden' name='answer'   id='answer'   value=''>
+				</form>
+
+
+			</div>
+		</div>
+
+<script>
+
+$(document).ready(function(){
+
+    $( "#draggablearea").sortable({
+    	containment:'#articlecontent',
+    	axis:'y',
+    	items:'.sortable'
+    });
+
+	$(window.document).on("selectstart", function(event){return false;});
+	$(document).bind("contextmenu", function(e){return false;});
+});
+
+
+function commit() {
+	spinner = new Spinner().spin(document.getElementById("articlecontent"));
+	var cnt  = document.getElementsByClassName("AnswerSheet").length;
+	var text = "";
+	var answer = "";
+	for (var i=0; i<cnt; i++) {
+		answer += document.getElementsByClassName("AnswerSheet")[i].childNodes[0].id;
+		answer += (i<cnt-1) ? "-" : "";
+	}
+	$("#answer").val(answer);
+	
+	$("#submit").fadeOut();
+	$.post("QuizProc.php", $("#frmEnt").serialize(), function(data){
+		if($.trim(data)>0) {
+			$("#section_body").effect("drop", {}, 400, function(){
+				location.href = "<?php echo $strNextPage; ?>";
+			});
+		} else {
+			$("#submit").fadeIn();
+			showAlert("등록하지 못하였습니다.");
+		}
+		spinner.stop();
+	})
+	.error(function(){
+		$("#submit").fadeIn();
+		showAlert("오류가 발생했습니다.");
+		spinner.stop();
+	});
+
+}
+
+</script>
+
+
+
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Footer.php');
+?>

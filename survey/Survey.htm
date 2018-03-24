@@ -1,0 +1,111 @@
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Session.php');
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Header.php');
+include_once($_SERVER["DOCUMENT_ROOT"].'/src/qm/SurveyDAO.php');
+
+$dao     = new src\qm\SurveyDAO();
+$arrList = $dao->getSurvey(0);
+$no      = 0;
+$cnt     = 0;
+if (isset($arrList)) {
+	$no = $arrList[0]['SURVEY_SEQ'];
+	$cnt = count($arrList);
+}
+?>
+
+
+
+
+		<div id="article">
+			<div id="section_location"></div>
+			<div id="section_body">
+				<h1><span>설문하기</span></h1>
+				<div class='subtitle'>여러분의 응답 결과는 연구 목적으로만 사용될 것입니다. 평소 자신의 생각이나 행동과 가장 가까운 번호에 표 해 주십시오.</div>
+				<div id="articlecontent">
+<!-- START -->
+
+					<form name='frmEnt' id='frmEnt' method='post'>
+					<input type='hidden' name='who'       id='who'       value='<?php echo $who; ?>'>
+					<input type='hidden' name='surveyseq' id='surveyseq' value='<?php echo $no;  ?>'>
+					<input type='hidden' name='cnt'       id='cnt'       value='<?php echo $cnt; ?>'>
+
+
+<table>
+<tr>
+	<th width='*'>항목</th>
+	<th width='6%'>전혀<br>그렇지<br>않다</th>
+	<th width='8%'>그렇지<br>않다</th>
+	<th width='8%'>보통이다</th>
+	<th width='8%'>그렇다</th>
+	<th width='8%'>매우<br>그렇다</th>
+</tr>
+<?php 
+if (isset($arrList)) {
+	foreach($arrList as $rs) {
+		echo "<tr>\n";
+		echo "<td>".$rs['ITEM']."</td>\n";
+		echo "<td class='c'><input type='radio' name='seq_".$rs['SURVEY_ITEM_SEQ']."' value='1'></td>\n";
+		echo "<td class='c'><input type='radio' name='seq_".$rs['SURVEY_ITEM_SEQ']."' value='2'></td>\n";
+		echo "<td class='c'><input type='radio' name='seq_".$rs['SURVEY_ITEM_SEQ']."' value='3' checked></td>\n";
+		echo "<td class='c'><input type='radio' name='seq_".$rs['SURVEY_ITEM_SEQ']."' value='4'></td>\n";
+		echo "<td class='c'><input type='radio' name='seq_".$rs['SURVEY_ITEM_SEQ']."' value='5'></td>\n";
+		echo "</tr>\n";
+	}
+}
+?>
+</table>
+
+					</form>					
+
+					<div id='alert'></div>
+					<div id="btns"><a id='submit' href='javascript:commit();' onclick='speakStop();' class='btn'>제출</a></div>
+
+
+<!-- END -->
+				</div>
+
+
+
+
+			</div>
+		</div>
+
+<script>
+
+$(document).ready(function(){
+
+
+});
+
+
+function commit() {
+	spinner = new Spinner().spin(document.getElementById("articlecontent"));
+
+	
+	$("#submit").fadeOut();
+	$.post("SurveyProc.php", $("#frmEnt").serialize(), function(data){
+		if($.trim(data)>0) {
+			$("#section_body").effect("drop", {}, 400, function(){
+				location.href = "/Complete.htm";
+			});
+		} else {
+			$("#submit").fadeIn();
+			showAlert("등록하지 못하였습니다.");
+		}
+		spinner.stop();
+	})
+	.error(function(){
+		$("#submit").fadeIn();
+		showAlert("오류가 발생했습니다.");
+		spinner.stop();
+	});
+
+}
+
+</script>
+
+
+
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Footer.php');
+?>

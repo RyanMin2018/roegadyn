@@ -1,0 +1,109 @@
+@charset "utf-8";
+@import url(http://fonts.googleapis.com/earlyaccess/notosanskr.css);
+
+html, body {margin:0;padding:0;height:100%;}
+body {min-width:320px;font-size:0.95em;color:#222;font-family:'Noto Sans KR';line-height:1.6em;background-color:#fafafa;}
+header,article,footer,div,ul,li,dl,dt,dd,p,h1,h2,h3,h4,h5,h6,fieldsetlegend,iframe,table,th,td {margin:0;padding:0;}
+ul {list-style:none;}
+ol {list-style-type:decimal-leading-zero;}
+img, fieldset, button {border:0;}
+button {cursor:pointer;font-size:0.95em;}
+b {color:#000;}
+iframe {width:0;height:0;overflow:hidden;border:0;}
+
+/* a tag */
+a {text-decoration:none;color:#000;}
+a:visited {color:#555;}
+a:hover {color:#00f;}
+a.btn {text-decoration:none;font-size:0.9em;letter-spacing:-1px;transition:background-color .4s ease-in-out;}
+a.btn:hover {background-color:#779;}
+
+/* sections */
+#container {width:100%;}
+#article {padding:10px 30px;min-height:800px;max-width:900px;margin:0 auto;}
+#section_location {width:100%;height:20px;margin-bottom:15px;text-align:left;font-size:0.8em;font-weight:bold;}
+#footer {display:relative;width:100%;height:80px;border-top:1px solid #ccc;background-color:#fafafa;}
+#alert {display:none;font-weight:bold;padding:20px;}
+
+
+/* footer area */
+#footer div {margin-top:35px;margin-left:28px;position:absolute;z-index:1;letter-spacing:3px;font-size:0.7em;}
+#goprevarticle {position:fixed;bottom:90px;right:20px;cursor:pointer;width:30px;height:30px;display:none;}
+#gonextarticle {position:fixed;bottom:55px;right:20px;cursor:pointer;width:30px;height:30px;display:none;}
+.gotext {position:fixed;right:18px;width:200px;height:30px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:0.85em;display:none;border:1px solid #ccc;border-radius:17px;background-color:#fff;padding:4px 54px 0px 10px;}
+#goprevtext {bottom:88px;}
+#gonexttext {bottom:53px;}
+#gotop {position:fixed;bottom:20px;right:20px;cursor:pointer;width:30px;height:30px;display:none;}
+
+/* article area */
+h1 {display:none;position:relative;margin-bottom:20px;font-size:1.6em;font-weight:bold;line-height:1.2em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-bottom:7px;border-bottom:1px solid #eee;}
+h1 span {border-bottom:5px solid #d42077;margin-bottom:-10px;}
+h1 span.circle {position:absolute;right:0px;top:11px;color:#777;font-weight:normal;font-size:0.6em;border-bottom:0;}
+div.subtitle {margin-bottom:20px;line-height:1.8em;font-size:1.1em;}
+div.subtitle a {font-weight:bold;padding-right:3px;font-size:1.1em;}
+div.subtitle a:before {content:'|';margin-right:3px;color:#ccc;}
+#categorycd {display:none;}
+#section_bottom_button {width:100%;margin-top:80px;border-top:1px solid #ccc;}
+#section_bottom_button .btn {border-radius:0px;border-bottom-left-radius:10px;border-bottom-right-radius:10px;}
+div.attached {margin:15px 0px;padding:15px;border:1px solid #ddd;} /* for attached files list */
+#articlecontent {text-align:justify;}
+#articlecontent a {border-bottom:1px solid #aaa;}
+#articlecontent img {display:block;max-width:100%;height:auto;margin-bottom:15px;} /* for attached images */
+#lazyload img {max-width:100%;min-height:500px;height:auto;}
+#draggablearea {padding:20px 0px;}
+
+/* form area */
+form {margin-top:30px;}
+form div {margin-bottom:10px;}
+label {display:block;float:left;width:100px;padding-top:3px;font-weight:bold;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+input[type=text], input[type=password], input[type=file], select, textarea {
+	font-family:'Noto Sans KR';
+	font-size:1em;border:1px solid #aaa;border-radius:0px;width:calc(100% - 110px);
+	box-sizing:border-box;padding:5px 15px;background-color:#fff;
+	transition:background-color .2s ease-in-out;
+}
+select {-webkit-appearance: none;-moz-appearance: none;appearance:none;padding:5px 15px;}
+input[type=text]:hover, input[type=password]:hover, input[type=file]:hover, select:hover, textarea:hover {color:#fff;background-color:#2077d4;}
+input[type=submit], #btns a.btn {padding:6px 20px;}
+span.textarea {display:block;float:right;width:calc(100% - 110px);margin-bottom:10px;}
+textarea {resize:none;height:300px;font-family:'Noto Sans KR';}
+label.dot:after {content:'*';color:#f00;margin-left:5px;}
+#btns {text-align:center;margin-top:25px;border-top:1px solid #eee;padding-top:10px;}
+input[type=submit], a.btn {border-radius:4px;border:0;padding:6px 10px;background:#2077d4;color:#fff;margin-right:6px;cursor:pointer;letter-spacing:-1px;font-weight:bold;font-size:1.1em;transition:background-color .4s ease-in-out;}
+input[type=submit]:hover, a.btn:hover {background-color:#165394;}
+input[type=radio] {width:16px;height:16px;}
+
+li {border:1px solid #ccc;width:calc(100% - 20px);margin-bottom:5px;z-index:0px;padding:10px;background-color:#eee;line-height:1.4em;}
+li.sortable {background-color:#fff;cursor:grab;cursor:-webkit-grab; cursor:-moz-grab;transition:background-color .4s ease-in-out;}
+li.sortable:hover {background-color:#4682B4;color:#fff;}
+
+/* table */
+table {border-spacing:0;cell-spacing:0;width:100%;table-layout:fixed;}
+th {padding:8px;border-top:2px solid #ccc;border-bottom:1px solid #ddd;font-size:0.8em;line-height:1.2em;text-align:center;}
+td {padding:8px;border-bottom:1px dotted #ccc;font-size:0.95em;}
+tr:not(:first-child):hover {background-color:#4682B4;color:#fff;}
+td.c {text-align:center;}
+td.n {text-align:right;}
+
+/* responsive web */
+@media only screen and (max-width : 500px) {
+	#article {padding:15px;margin-top:-10px;min-height:320px;}
+	#footer div {letter-spacing:1px;margin-left:15px;margin-top:15px;}
+	label, .mobilehide {display:none;}
+	#pagination .searchbox {width:100px;}
+	textarea {height:200px;}
+	input[type=text], input[type=password], input[type=file], select, textarea {width:100%;}
+	#dragandrophandler {margin-left:0px;}
+	h1 {font-size:1.3em;line-height:1.5em;}
+	li {padding:5px;}
+	li span {font-size:0.8em;}
+	li {line-height:1.2em;}
+	#section_body div.subtitle {font-size:0.825em;}
+}
+
+/* placeholder */
+::-webkit-input-placeholder {color: #bbb;}
+::-moz-placeholder {color: #bbb;}
+::-moz-placeholder {color: #bbb;}
+::-ms-input-placeholder {color: #bbb;} 
+

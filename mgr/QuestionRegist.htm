@@ -1,0 +1,170 @@
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/src/mm/SessionStatus.php');
+$lo  = new src\mm\SessionStatus();
+$who = $lo->getManagerUserId();
+
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Header.php');
+?>
+
+		<link rel="stylesheet" href="MgrStyle.css" type="text/css" media="all">
+
+
+		<div id="article">
+			<div id="section_location">
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/mgr/menu.php');
+?>
+			</div>
+			<div id="section_body">
+				<h1><span>문장완성 - 신규등록</span></h1>
+				<div class='subtitle'>맨 앞의 선택상자를 선택하면 고정항목으로 저장됩니다. '저장' 단추를 클릭하기 전까지는 저장되지 않습니다.</div>
+				<div id="articlecontent">
+<!-- START -->
+
+					<div id='addbtn'>
+						<a id='sortableenable'  href='javascript:sortableEnable();' class='btn'>순서변경모드</a>
+						<a id='sortabledisable' href='javascript:sortableDisable();' class='btn'>순서변경모드해제</a>
+						<a id='additem' href='javascript:append();' class='btn'>문장 추가</a>
+					</div>
+
+					<form name='frmEnt' id='frmEnt' method='post'>
+					<input type='hidden' name='cnt' id='cnt' value='1'>
+					<input type='hidden' name='answer' id='answer' value=''>
+					<ul id='draggablearea'>
+
+						<li class="AnswerSheet sortable" id="AnswerSheet_1"><span id="1"></span><input type="checkbox" name="fixyn_1" value="Y"><input type="text" name="item_1" id='item_1' value=""><a href="javascript:drop(1);" class="btn"></a></li>
+						
+					</ul>
+
+					</form>
+					<div id='alert'></div>
+
+
+
+
+
+<!-- END -->
+				</div>
+				<div id="btns"><a href='javascript:commit();' onclick='speakStop();' class='btn'>등록</a><a href='QuestionList.htm' class='btn'>목록</a></div>
+			</div>
+		</div>
+
+<script type='text/javascript'>
+
+var isSortableMode = false;
+
+function sortableEnable() {
+	$("li").css("border", "1px solid #ccc");
+	$("li").css("background-color", "#fff");
+	$("#sortableenable").hide();
+	$("#additem").hide();
+	$("#sortabledisable").show();
+	$("#savesort").show();
+	for (i=1; i<$("#draggablearea > li").length+1; i++) {
+		var seq = $("#draggablearea > li:nth-child("+i+") > span").attr('id');
+		var checked = ($("#fixyn_"+seq).is(":checked"))?"checked":"";
+		var text = $("#draggablearea > li:nth-child("+i+") > input:text").val();
+		var str = '<span id="'+ seq+'" f="'+checked+'"></span>';
+		str    += text;
+		$("#draggablearea > li:nth-child("+i+")").html(str);
+	}
+    $("#draggablearea").sortable("option", "disabled", false);
+    $("#draggablearea").sortable("option", "items", '.sortable');
+    isSortableMode = true;
+}
+
+function sortableDisable() {
+	$("li").css("border", "0");
+	$("li").css("background-color", "transparent");
+	$("#sortableenable").show();
+	$("#additem").show();
+	$("#sortabledisable").hide();
+	$("#savesort").hide();
+	for (i=1; i<$("#draggablearea > li").length+1; i++) {
+		var seq = $("#draggablearea > li:nth-child("+i+") > span").attr('id');
+		var checked = $("#draggablearea > li:nth-child("+i+") > span").attr('f');
+		var text = $("#draggablearea > li:nth-child("+i+")").text();
+		var str = '<span id="'+ seq+'"></span>';
+		str    += '<input type="checkbox" name="fixyn_'+seq+'" id="fixyn_'+seq+'" value="Y" '+checked+'>';
+		str    += '<input type="text" name="item_'+seq+'" id="item_'+seq+'" value="'+text+'">';
+		str    += '<a href="javascript:drop('+seq+');" class="btn"></a>';
+		$("#draggablearea > li:nth-child("+i+")").html(str);
+	}
+	$("#draggablearea").sortable("option", "disabled", true);
+	isSortableMode = false;
+}
+
+$(document).ready(function(){
+
+    $( "#draggablearea").sortable({
+    	containment:'#articlecontent',
+    	axis:'y',
+    	items:'.sortable'
+    });
+
+    $(function() {
+		sortableDisable();
+	});
+    
+});
+
+function append() {
+	var current = $("#cnt").val();
+	current++;
+	$("#cnt").val(current);
+	var html = '<li class="AnswerSheet sortable" id="AnswerSheet_'+current+'" style="background-color:transparent;border:0;"><span id="'+current+'" f=""></span><input type="checkbox" name="fixyn_'+current+'" value="Y"><input type="text" name="item_'+current+'" id="item_'+current+'"><a href="javascript:drop('+current+')" class="btn"></a></li>';
+	$("#draggablearea").append(html);
+	$("#item_"+current).focus();
+}
+
+function drop(i) {
+	$("#AnswerSheet_"+i).remove();
+}
+
+function commit() {
+	var is   = true;
+
+	if (isSortableMode == true) sortableDisable();
+	var cnt  = document.getElementsByClassName("AnswerSheet").length;
+	var text = "";
+	var answer = "";
+	for (var i=0; i<cnt; i++) {
+		answer += document.getElementsByClassName("AnswerSheet")[i].childNodes[0].id;
+		answer += (i<cnt-1) ? "-" : "";
+		
+		if ($("#item_"+document.getElementsByClassName("AnswerSheet")[i].childNodes[0].id).val().trim().length < 2) {
+			showAlert("문장을 입력하십시오.");
+			is = false;
+			break;
+		}
+	}
+	$("#answer").val(answer);
+
+	if (is) {
+		spinner = new Spinner().spin(document.getElementById("articlecontent"));
+		$("#submit").fadeOut();
+		$.post("QuestionRegistProc.php", $("#frmEnt").serialize(), function(data){
+			if($.trim(data)==1) {
+				$("#section_body").effect("drop", {}, 400, function(){
+					location.href = "QuestionList.htm";
+				});
+			} else {
+				$("#submit").fadeIn();
+				showAlert("등록하지 못했습니다.");
+			}
+			spinner.stop();
+		})
+		.error(function(){
+			$("#submit").fadeIn();
+			showAlert("네트워크에 장애가 있습니다.");
+			spinner.stop();
+		});
+	}
+
+}
+
+</script>
+
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Footer.php');
+?>

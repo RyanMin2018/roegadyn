@@ -1,0 +1,85 @@
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Session.php');
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Header.php');
+include_once($_SERVER["DOCUMENT_ROOT"].'/src/qm/QuestionDAO.php');
+
+$intQuizCnt  = 0;
+$arrQuiz;
+$strNextPage = "Quiz.htm";
+
+$dao  = new src\qm\QuestionDAO();
+$arrQuiz = $dao->getQuestions();
+
+$intQuizCnt = (isset($arrQuiz)) ? count($arrQuiz) : 0;
+
+?>
+		<div id="article">
+			<div id="section_location"></div>
+			<div id="section_body">
+				<h1><span>문장 배열하여 글 완성하기 <font color='#d42077'>(안내 및 연습)</font></span></h1>
+				<div class='subtitle'>다음과 같이 배열된 문장들이 있습니다. 의미가 통하도록 문장의 순서를 바로 잡아(마우스로 해당 문장을 끌어다가 놓기)한 편의 글을 완성하기 바랍니다.<br>일부 문항의 경우 한 문장의 위치가 고정되어 있습니다.<br><b>글은 모두 <?php echo $intQuizCnt; ?>개이며 제한 시간은 20분</b>입니다.<br>준비가 되었으면 "<b>실습 시작</b>"을 선택하십시오. </div>
+				<div id="articlecontent">
+<!-- START -->
+
+					<ul id='draggablearea'>
+						<li class='AnswerSheet'          id='AnswerSheet_1'><span id='1'>고정 항목의 예입니다.</span></li>
+						<li class='AnswerSheet sortable' id='AnswerSheet_2'><span id='4'>항목을 끌어 원하는 위치에 놓으세요.</span></li>
+						<li class='AnswerSheet sortable' id='AnswerSheet_3'><span id='2'>항목을 끌어 원하는 위치에 놓으세요.</span></li>
+						<li class='AnswerSheet sortable' id='AnswerSheet_4'><span id='3'>항목을 끌어 원하는 위치에 놓으세요.</span></li>
+					</ul>
+					
+					<div id='alert'></div>
+
+<!-- END -->
+				</div>
+
+
+				<div id="btns"><a href='javascript:commit();' class='btn'>실습 시작</a></div>
+
+				<form name='frmEnt' id='frmEnt' method='post'>
+				<input type='hidden' name='question' id='question' value='0'>
+				<input type='hidden' name='who'      id='who'      value='<?php echo $who; ?>'>
+				<input type='hidden' name='answer'   id='answer'   value=''>
+				</form>
+
+
+			</div>
+		</div>
+
+<style>
+#AnswerSheet_2 {background-color:#eeeeff;}
+#AnswerSheet_3 {background-color:#eeffee;}
+#AnswerSheet_4 {background-color:#ffeeee;}
+
+#AnswerSheet_2:hover {background-color:#333377;} 
+#AnswerSheet_3:hover {background-color:#337733;}
+#AnswerSheet_4:hover {background-color:#773333;}
+</style>
+
+
+<script>
+
+$(document).ready(function(){
+
+    $( "#draggablearea").sortable({
+	    	containment:'#articlecontent',
+	    	axis:'y',
+	    	items:'.sortable'
+    });
+
+	$(window.document).on("selectstart", function(event){return false;});
+	// $(document).bind("contextmenu", function(e){return false;});
+});
+
+function commit() {
+	$("#section_body").effect("drop", {}, 400, function(){
+		location.href = "Quiz.htm";
+	});
+}
+
+</script>
+
+
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Footer.php');
+?>

@@ -1,0 +1,12 @@
+log
+CVS
+test.*
+*.bak
+js_backup
+DbConn.php
+.DS_Store
+.buildpath
+.cvsignore
+.project
+.settings/org.eclipse.php.core.prefs
+.settings/org.eclipse.wst.common.project.facet.core.xml

@@ -1,0 +1,141 @@
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/src/mm/SessionStatus.php');
+$lo  = new src\mm\SessionStatus();
+$who = $lo->getManagerUserId();
+
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Header.php');
+include_once($_SERVER["DOCUMENT_ROOT"].'/src/mgr/MgrQuestionDAO.php');
+
+$dao  = new src\mgr\MgrQuestionDAO();
+$arrList = $dao->getList();
+
+?>
+
+		<link rel="stylesheet" href="MgrStyle.css" type="text/css" media="all">
+
+		<div id="article">
+			<div id="section_location">
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/mgr/menu.php');
+?>
+			</div>
+			<div id="section_body">
+				<h1><span>문장완성 - 문항관리</span></h1>
+				<div class='subtitle'><b>문항의 첫 항목</b>이 제시됩니다. 순서를 변경한 후 '순서저장'을 선택하십시오.</div>
+				<div id="articlecontent">
+<!-- START -->
+
+					<div id='addbtn'>
+						<a id='sortableenable'  href='javascript:sortableEnable();' class='btn'>순서변경모드</a>
+						<a id='sortabledisable' href='javascript:sortableDisable();' class='btn'>순서변경모드해제</a>
+					</div>
+					<ul id='draggablearea'>
+
+<?php 
+if (isset($arrList)) {
+	$j = 0;
+	foreach($arrList as $rs) {
+		$j++;
+		echo '<li class="AnswerSheet sortable" id="AnswerSheet_'.$j.'"><span id="'.$rs['QUESTION_SEQ'].'"></span><a href="QuestionDetail.htm?no='.$rs['QUESTION_SEQ'].'">'.$rs['ITEM'].'</a></li>';
+	}
+}
+
+?>
+					</ul>
+					
+					<div id='alert'></div>
+
+
+
+
+
+<!-- END -->
+				</div>
+
+
+				<div id="btns"><a id='savesort' href='javascript:commit();' class='btn'>순서저장</a><a href='QuestionRegist.htm' class='btn'>신규등록</a></div>
+
+				<form name='frmEnt' id='frmEnt' method='post'>
+				<input type='hidden' name='answer'   id='answer'   value=''>
+				</form>
+
+
+			</div>
+		</div>
+
+<script>
+
+function sortableEnable() {
+	$("#draggablearea li").css("border", "1px solid #ccc");
+	$("#draggablearea li").css("background-color", "#fff");
+	$("#sortableenable").hide();
+	$("#sortabledisable").show();
+	for (i=1; i<$("#draggablearea > li").length+1; i++) {
+		var str = "<span id='" + $("#draggablearea > li:nth-child("+i+") > span").attr('id') + "'></span>" + $("#draggablearea > li:nth-child("+i+")").text();
+		$("#draggablearea > li:nth-child("+i+")").html(str);
+	}
+    $("#draggablearea").sortable("option", "disabled", false);
+}
+
+function sortableDisable() {
+	$("#draggablearea li").css("border", "0");
+	$("#draggablearea li").css("background-color", "transparent");
+	$("#sortableenable").show();
+	$("#sortabledisable").hide();
+	for (i=1; i<$("#draggablearea > li").length+1; i++) {
+		var str = "<span id='" + $("#draggablearea > li:nth-child("+i+") > span").attr('id') + "'></span><a href='QuestionDetail.htm?no=" + $("#draggablearea > li:nth-child("+i+") > span").attr('id') + "'>" + $("#draggablearea > li:nth-child("+i+")").text() + "</a>";
+		$("#draggablearea > li:nth-child("+i+")").html(str);
+	}
+	$("#draggablearea").sortable("option", "disabled", true);
+}
+
+$(document).ready(function(){
+    $("#draggablearea").sortable({
+    	containment:'#articlecontent',
+    	axis:'y',
+    	items:'.sortable'
+    });
+
+    $(function() {
+    		sortableDisable();
+    });
+});
+
+function commit() {
+	spinner = new Spinner().spin(document.getElementById("articlecontent"));
+	var cnt  = document.getElementsByClassName("AnswerSheet").length;
+	var text = "";
+	var answer = "";
+	for (var i=0; i<cnt; i++) {
+		answer += document.getElementsByClassName("AnswerSheet")[i].childNodes[0].id;
+		answer += (i<cnt-1) ? "-" : "";
+	}
+	$("#answer").val(answer);
+	
+	console.log($("#answer").val());
+
+	$("#submit").fadeOut();
+	$.post("QuestionOrderProc.php", $("#frmEnt").serialize(), function(data){
+		if($.trim(data)==1) {
+			$("#section_body").effect("drop", {}, 400, function(){
+				location.reload();
+			});
+		} else {
+			$("#submit").fadeIn();
+			showAlert("등록하지 못했습니다.");
+		}
+		spinner.stop();
+	})
+	.error(function(){
+		$("#submit").fadeIn();
+		showAlert("네트워크에 문제가 있습니다.");
+		spinner.stop();
+	});
+
+}
+
+</script>
+
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Footer.php');
+?>

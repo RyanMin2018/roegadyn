@@ -1,0 +1,159 @@
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/src/mm/SessionStatus.php');
+$lo  = new src\mm\SessionStatus();
+$who = $lo->getManagerUserId();
+
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Header.php');
+include_once($_SERVER["DOCUMENT_ROOT"].'/src/mgr/MgrQuestionDAO.php');
+
+$schoolcd      = (isset($_GET['schoolcd']))    ? $_GET['schoolcd']    : "";
+$questionseq   = (isset($_GET['questionseq'])) ? $_GET['questionseq'] : "1";
+$regdt         = (isset($_GET['regdt']))       ? $_GET['regdt']       : "";
+
+
+$dao = new src\mgr\MgrQuestionDAO();
+$arrItem = $dao->getList($questionseq);
+$arrList = $dao->getChartData($regdt, $questionseq, $schoolcd);
+
+?>
+		<link rel="stylesheet" href="MgrStyle.css" type="text/css" media="all">
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+		<div id="article">
+			<div id="section_location">
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/mgr/menu.php');
+?>
+			</div>
+			<div id="section_body">
+				<h1><span>문장완성 - 통계</span></h1>
+				<div id="articlecontent">
+<!-- START -->
+					<form name='frmSearch' id='frmSearch' method='get'>
+					<div id='section_search'>
+							<select style='width:100px;' name='schoolcd' id='schoolcd' title="학교선택">
+								<option value=''>학교전체</option>
+<?php
+echo '<option value="E"'.(($schoolcd=='E')?" selected":"").'>초등학교 </option>';
+echo '<option value="M"'.(($schoolcd=='M')?" selected":"").'>중학교 </option>';
+echo '<option value="H"'.(($schoolcd=='H')?" selected":"").'>일반계 고등학교 </option>';
+echo '<option value="S"'.(($schoolcd=='S')?" selected":"").'>특성화 고등학교 </option>';
+echo '<option value="U"'.(($schoolcd=='U')?" selected":"").'>대학교 </option>';
+?>
+							</select>
+							<select style='width:500px;' name='questionseq' id='questionseq' title="문항">
+<?php
+if (isset($arrItem)) {
+	foreach ($arrItem as $a) {
+		echo '<option value="'.$a['QUESTION_SEQ'].'"'.(($a['QUESTION_SEQ']==$questionseq)?" selected":"").'>'.$a['ITEM'].'</option>';
+
+	}
+}
+?>
+							</select>					
+							<input type='text' id="regdt" name='regdt' maxlength='10' value='<?php echo $regdt; ?>' style='width:80px;border:1px solid #aaa;padding:3px;' readOnly placeholder='수행일'>
+							<a href='javascript:search();' class='btn r'>검색</a>
+							<a href='javascript:searchDefault();' class='btn r'>초기화</a>
+					</div>
+					</form>
+					<div id='alert'></div>
+					<ul>
+<?php
+function get_school($t) {
+	$returnval = "";
+	switch ($t) {
+		case 'E' :
+			$returnval = "초등학교";
+			break;
+		case 'M' :
+			$returnval = "중학교";
+			break;
+		case 'H' :
+			$returnval = "고등학교";
+			break;
+		case 'S' :
+			$returnval = "특성화고등학교";
+			break;
+		case 'U' :
+			$returnval = "대학교";
+			break;
+
+	}
+	return $returnval;
+
+
+}
+
+if (isset($arrList)) {
+
+	$schoolcds = array();
+	foreach($arrList as $r) {
+		if (!in_array($r['SCHOOL_CD'], $schoolcds)) array_push($schoolcds, $r['SCHOOL_CD']);
+	}
+
+	for ($i=0; $i<count($schoolcds); $i++) {
+				echo '<script type="text/javascript">';
+				echo 'google.charts.load("current", {packages:["corechart"]});';
+				echo 'google.charts.setOnLoadCallback(drawChart);';
+				echo 'function drawChart() {';
+				echo '  var data = google.visualization.arrayToDataTable([';
+				echo '    ["성별", "남학생", "여학생"],';
+				$txt = "";
+				foreach($arrList as $r) {
+					if ($r['SCHOOL_CD']==$schoolcds[$i]) {
+						$txt = $txt.",['".$r['ANSWER']."', ".$r['A_CNT'].", ".$r['B_CNT']."]";
+					}
+				}
+				$txt = substr($txt, 1);
+				echo $txt;
+				echo '  	  ]);';
+				
+				echo '  var view = new google.visualization.DataView(data);';
+				echo '  var options = {';
+				echo '    title: "['.get_school($schoolcds[$i]).'] ",';
+				echo '    bar: {groupWidth: "95%"}, width:880, height:300 ';
+				echo '  };';
+				
+				echo '  var chart = new google.visualization.ColumnChart(document.getElementById("chart_'.$schoolcds[$i].'"));';
+				echo '  chart.draw(data, options);';
+				echo '}';
+				echo '</script>';
+				echo '<li><div id="chart_'.$schoolcds[$i].'"></div></li>';
+	}
+}
+?>
+					</ul>
+
+<!-- END -->
+				</div>
+			</div>
+		</div>
+
+<script type='text/javascript' src='/js/jquery.table2excel.min.js'></script>
+<script type='text/javascript'>
+$(document).ready(function(){
+	$("#regdt").datepicker({
+        monthNamesShort: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
+		dayNamesMin:["월","화","수","목","금","토","일"],
+        showMonthAfterYear: true,
+    	changeMonth: true,
+        changeYear: true,
+        dateFormat:"yy-mm-dd"
+	});
+
+});
+
+function search() {
+	document.frmSearch.submit();
+}
+
+function searchDefault() {
+	location.href = "SurveyResultChart.htm";
+}
+
+</script>
+
+
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Footer.php');
+?>

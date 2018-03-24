@@ -1,0 +1,181 @@
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/src/mm/SessionStatus.php');
+$lo  = new src\mm\SessionStatus();
+$who = $lo->getManagerUserId();
+
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Header.php');
+include_once($_SERVER["DOCUMENT_ROOT"].'/src/mgr/MgrResultDAO.php');
+
+$page     = (isset($_GET['page']))     ? $_GET['page']     : 1;
+$schoolcd = (isset($_GET['schoolcd'])) ? $_GET['schoolcd'] : "";
+$gendercd = (isset($_GET['gendercd'])) ? $_GET['gendercd'] : "";
+$regdt    = (isset($_GET['regdt']))    ? $_GET['regdt']    : "";
+
+$dao = new src\mgr\MgrResultDAO();
+$arrList = $dao->getEssayList($schoolcd, $gendercd, $regdt, $page);
+
+$intCnt = 0;
+if (isset($arrList)) {
+	$intCnt = $arrList[0]['CNT'];
+}
+
+?>
+		<link rel="stylesheet" href="MgrStyle.css?5" type="text/css" media="all">
+		<div id="article">
+			<div id="section_location">
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/mgr/menu.php');
+?>
+			</div>
+			<div id="section_body">
+				<h1><span>글쓰기 - 결과</span></h1>
+				<div id="articlecontent">
+<!-- START -->
+					<form name='frmSearch' id='frmSearch' method='get'>
+					<div id='section_search'>
+						<div>
+							<select style='width:100px;' name='schoolcd' id='schoolcd' title="학교선택">
+								<option value=''>학교전체</option>
+<?php
+echo '<option value="E"'.(($schoolcd=='E')?" selected":"").'>초등학교 </option>';
+echo '<option value="M"'.(($schoolcd=='M')?" selected":"").'>중학교 </option>';
+echo '<option value="H"'.(($schoolcd=='H')?" selected":"").'>일반계 고등학교 </option>';
+echo '<option value="S"'.(($schoolcd=='S')?" selected":"").'>특성화 고등학교 </option>';
+echo '<option value="U"'.(($schoolcd=='U')?" selected":"").'>대학교 </option>';
+?>
+							</select>
+							<select style='width:80px;' name='gendercd' id='gendercd' title="성별">
+								<option value=''>성별전체</option>
+<?php
+echo '<option value="A"'.(($gendercd=='A')?" selected":"").'>남학생</option>';
+echo '<option value="B"'.(($gendercd=='B')?" selected":"").'>여학생</option>';
+?>
+							</select>					
+							<input type='text' id="regdt" name='regdt' maxlength='10' value='<?php echo $regdt; ?>' style='width:80px;border:1px solid #aaa;padding:3px;' readOnly placeholder='수행일'>
+						</div>
+						<div>
+							<a href='javascript:search();' class='btn r'>검색</a>
+							<a href='javascript:searchDefault();' class='btn r'>초기화</a>
+							<a id='exceldownlod' class='btn r'>엑셀다운로드</a>
+						</div>
+					</div>
+					</form>
+
+					<div id='alert'></div>
+					
+					<div style="font-size:0.8em;"><a href='javascript:dropRow();' class='btn r' style='background-color:#d42077;'>선택항목삭제</a></div>
+					
+					<form name='frmEnt' id='frmEnt'>
+					<table id='ResultTable' style='margin-top:-25px;'>
+						<tr>
+							<th width='10'><input type='checkbox' name='allcheck' id='allcheck' onclick='checkAll();'></th>
+							<th width='80'>참가자코드</th>
+							<th width='70'>수행일</th>
+							<th width='740'>내용</th>
+						</tr>
+<?php
+if (isset($arrList)) {
+	foreach($arrList as $r) {
+		echo '<tr>';
+		echo '<td valign="top"><input type="checkbox" name="subjectseq[]" value="'.$r['SUBJECT_SEQ'].'"></td>';
+		echo '<td valign="top">'.$r['SCHOOL_CD'].$r['GRADE'].$r['GENDER_CD'].$r['LSEQ'].'</td>';
+		echo '<td valign="top">'.substr($r['REG_DT'],0,10).'</td>';
+		echo '<td style="white-space:normal;word-break:break-all;">'.str_replace("\n", "<br>", $r['CONTENT']).'</td>';
+		echo '</tr>';
+	}
+} else {
+	echo '<tr><td colspan="4" class="c">검색결과가 존재하지 않습니다.</td></tr>';
+}
+?>
+					</table>
+					</form>
+					<div id='pagination'>
+						<script type='text/javascript' src='/js/pagination.js?2'></script>
+						<script type='text/javascript'>
+<?php
+	echo 'getPaging('.$page.', '.$intCnt.', 20, 10, "&schoolcd='.$schoolcd.'&gendercd='.$gendercd.'&regdt='.$regdt.'");'; 
+?>
+						</script>
+
+					</div>
+
+<!-- END -->
+				</div>
+			</div>
+		</div>
+		
+<script type='text/javascript' src='/js/jquery.table2excel.min.js'></script>
+<script type='text/javascript'>
+$(document).ready(function(){
+	$("#regdt").datepicker({
+        monthNamesShort: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
+		dayNamesMin:["일","월","화","수","목","금","토"],
+        showMonthAfterYear: true,
+    	changeMonth: true,
+        changeYear: true,
+        dateFormat:"yy-mm-dd"
+	});
+
+	$("#exceldownlod").on("click", function() {
+		var fn = '작문결과_<?php echo $page; ?>Page_'+today()+'.xls';
+		$("#ResultTable").table2excel({
+	        name: "Result",
+			filename: fn
+	    });
+	});
+});
+
+function search() {
+	document.frmSearch.submit();
+}
+
+function searchDefault() {
+	location.href = "EssayResult.htm";
+}
+
+function isIE() {
+	var agent = navigator.userAgent.toLowerCase();
+	if ( (navigator.appName == 'Netscape' && agent.indexOf('trident') != -1) || (agent.indexOf("msie") != -1)) {
+	     return true;
+	}
+    return false;
+}
+
+function today(){
+    var date = new Date();
+    var year  = date.getFullYear();
+    var month = date.getMonth() + 1; // 0부터 시작하므로 1더함 더함
+    var day   = date.getDate();
+    if (("" + month).length == 1) { month = "0" + month; }
+    if (("" + day).length   == 1) { day   = "0" + day;   }
+	return year+''+month+''+day;
+}
+
+function checkAll() {
+	if ($("#allcheck").prop("checked")) {
+		$("input[type=checkbox]").prop("checked",true);
+	} else {
+		$("input[type=checkbox]").prop("checked",false);
+	}
+}
+
+function dropRow() {
+	spinner = new Spinner().spin(document.getElementById("articlecontent"));
+	$.post("EssayResultDropProc.php", $("#frmEnt").serialize(), function(data){
+		$("#section_body").effect("drop", {}, 400, function(){
+			location.reload();
+		});
+		spinner.stop();
+	})
+	.error(function(){
+		showAlert("네트워크에 문제가 있습니다.");
+		spinner.stop();
+	});
+}
+
+</script>
+
+
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Footer.php');
+?>

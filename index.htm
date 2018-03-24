@@ -1,0 +1,61 @@
+<?php
+session_start();
+session_destroy();
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Header.php');
+?>
+
+
+
+
+		<div id="article">
+			<div id="section_location"></div>
+			<div id="section_body">
+				<h1><span>학습자 의미구성 능력 진단</span></h1>
+				<div id="articlecontent">
+<!-- START -->
+
+
+					<div id='thanks'>실습을 시작합니다.</div>
+					<div>
+	
+						총 소요 시간은 대략 40분 정도이며, 다음의 순서로 진행됩니다.
+
+
+						<ol>
+							<li><b>참가자 정보 등록</b></li>
+							<li><b>문장 배열</b>(시간 : 20분) 배열된 문장들을 의미가 통하도록 순서를 바로 잡아 한 편의 글을 완성합니다. </li>
+							<li><b>글쓰기</b>(시간 : 20분) 제시된 주제로 500자 내외의 글을 완성합니다.</li>
+							<li><b>설문 응답</b></li>
+						</ol> 
+						
+					</div>
+					<div id="btns"><a id='submit' href='/account/Registration.htm' onclick='speakStop();' class='btn'>시작</a></div>
+
+
+<!-- END -->
+				</div>
+
+
+
+
+			</div>
+		</div>
+<style>
+#thanks {margin-top:150px;font-size:4em;letter-spacing:-5px;height:100px;}
+li {border:0;padding:0;background-color:#fafafa;}
+@media only screen and (max-width : 500px) {
+#thanks {margin-top:50px;font-size:2.2em;letter-spacing:-2px;height:100px;}
+}
+</style>
+<script>
+
+$(document).ready(function(){
+
+
+});
+
+</script>
+
+<?php
+include_once($_SERVER["DOCUMENT_ROOT"].'/inc/Footer.php');
+?>
